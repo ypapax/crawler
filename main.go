@@ -107,6 +107,8 @@ func parse(u string, timeout time.Duration, statusCodeMin, statusCodeMax int, f 
 	aa := d.Find("a")
 	done := make(chan struct{})
 	errs := make(chan error, aa.Length())
+	lf := logrus.WithField("up.Host", up.Host).WithField("u", u)
+
 	go func(){
 		aa.Each(func(i int, s *goquery.Selection) {
 			href, exists := s.Attr("href")
@@ -122,8 +124,10 @@ func parse(u string, timeout time.Duration, statusCodeMin, statusCodeMax int, f 
 				errs <- err2
 				return
 			}
+			lfi := lf.WithField("up2.Host", up2.Host).WithField("href", href)
 			if onlySameHost {
 				if len(up2.Host) != 0 && !sameMainDomain(up.Host, up2.Host) {
+					lfi.Infof("not same domain, skip it")
 					return
 				}
 			}
