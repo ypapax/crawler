@@ -149,20 +149,6 @@ func parse(u string, timeout time.Duration, statusCodeMin, statusCodeMax int, f 
 	return links, nil
 }
 
-// Converts sub.domain.com to domain.com
-// and sub2.sub.domain.com to domain.com
-func mainDomain(host string) string {
-	const (
-		subDomainSep = "."
-		mainDomainParts = 2
-	)
-	pp := strings.Split(host, subDomainSep)
-	if len(pp) <= mainDomainParts {
-		return host
-	}
-	return strings.Join(pp[len(pp)-mainDomainParts:], subDomainSep)
-}
-
 func sameMainDomain(host1, host2 string) bool {
-	return mainDomain(host1) == mainDomain(host2)
+	return strings.Contains(host2, host1) || strings.Contains(host1, host2)
 }
