@@ -56,6 +56,7 @@ func parse(u string, timeout time.Duration, statusCodeMin, statusCodeMax int, f 
 		return exists
 	}()
 	if isRequested {
+		l.Infof("it's already requested, skip it")
 		return nil, nil
 	}
 	l.Infof("requesting...")
