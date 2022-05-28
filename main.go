@@ -13,8 +13,8 @@ import (
 	"time"
 )
 
-func Run(u string, timeout time.Duration, f CheckPageContentFunc, statusCodeMin, statusCodeMax int, onlySameHost bool) error {
-	if err := parseRecursive(u, timeout, statusCodeMin, statusCodeMax, f, onlySameHost); err != nil {
+func Run(u string, timeout time.Duration, f CheckPageContentFunc, statusCodeMin, statusCodeMax int, onlySameHost bool, linksLimit int) error {
+	if err := parseRecursive(u, timeout, statusCodeMin, statusCodeMax, f, onlySameHost, linksLimit); err != nil {
 		return errors.WithStack(err)
 	}
 	return nil
@@ -27,13 +27,26 @@ var (
 
 type CheckPageContentFunc func(string)error
 
-func parseRecursive(u string, timeout time.Duration, statusCodeMin, statusCodeMax int, f CheckPageContentFunc, onlySameHost bool) error {
+func parseRecursive(u string, timeout time.Duration, statusCodeMin, statusCodeMax int, f CheckPageContentFunc, onlySameHost bool, linksLimit int) error {
+	lf := logrus.WithField("parentUrl", u).WithField("linksLimit", linksLimit)
 	ll, err := parse(u, timeout, statusCodeMin, statusCodeMax, f, onlySameHost)
 	if err != nil {
 		return errors.WithStack(err)
 	}
 	for _, l := range ll {
-		if errP := parseRecursive(l, timeout, statusCodeMin, statusCodeMax, f, onlySameHost); errP != nil {
+		if enough := func() bool {
+			if linksLimit == 0 {
+				return false
+			}
+			requestedMtx.RLock()
+			defer requestedMtx.RUnlock()
+			lf = lf.WithField("len(requested)", len(requested))
+			return len(requested) > linksLimit
+		}(); enough {
+			lf.Infof("this is enough links")
+			return nil
+		}
+		if errP := parseRecursive(l, timeout, statusCodeMin, statusCodeMax, f, onlySameHost, linksLimit); errP != nil {
 			return errors.WithStack(errP)
 		}
 	}
