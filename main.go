@@ -42,10 +42,12 @@ func parseRecursive(u string, timeout time.Duration, statusCodeMin, statusCodeMa
 
 func parse(u string, timeout time.Duration, statusCodeMin, statusCodeMax int, f CheckPageContentFunc, onlySameHost bool) (links []string, finalErr error) {
 	l := logrus.WithField("u", u)
+	t1 := time.Now()
 	defer func() {
 		if finalErr != nil {
 			finalErr = errors.Wrapf(finalErr, "for url %+v", u)
 		}
+		l.Infof("requested for %+v", time.Since(t1))
 	}()
 	isRequested := func() bool {
 		requestedMtx.RLock()
