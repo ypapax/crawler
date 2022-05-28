@@ -52,6 +52,7 @@ func parse(u string, timeout time.Duration, statusCodeMin, statusCodeMax int, f 
 	isRequested := func() bool {
 		requestedMtx.RLock()
 		defer requestedMtx.RUnlock()
+		l = l.WithField("len(requested)", len(requested))
 		_, exists := requested[u]
 		return exists
 	}()
