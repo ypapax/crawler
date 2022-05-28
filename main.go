@@ -87,7 +87,7 @@ func parse(u string, timeout time.Duration, statusCodeMin, statusCodeMax int, f 
 		return nil, errors.WithStack(err)
 	}
 	if errF := f(string(b)); errF != nil {
-		return nil, errors.WithStack(err)
+		return nil, errors.WithStack(errF)
 	}
 	r := bytes.NewReader(b)
 	d, err := goquery.NewDocumentFromReader(r)
