@@ -112,6 +112,8 @@ func parse(u string, timeout time.Duration, statusCodeMin, statusCodeMax int, f 
 			}
 			if up2.Host == "" {
 				up2.Host = up.Host
+			}
+			if len(up2.Scheme) == 0 {
 				up2.Scheme = up.Scheme
 			}
 			links = append(links, up2.String())
